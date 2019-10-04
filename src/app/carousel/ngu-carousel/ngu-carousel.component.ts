@@ -60,7 +60,7 @@ import {
 // tslint:disable-next-line:component-class-suffix
 export class NguCarousel<T> extends NguCarouselStore
   implements OnInit, AfterContentInit, AfterViewInit, OnDestroy, DoCheck {
-  _dataSubscription: Subscription;
+  _dataSubscription: Subscription = new Subscription();
   _dataSource: any;
   _dataDiffer: IterableDiffer<{}>;
   styleid: string;
@@ -74,14 +74,14 @@ export class NguCarousel<T> extends NguCarouselStore
   @Input('inputs')
   private inputs: NguCarouselConfig;
   @Output('carouselLoad')
-  private carouselLoad = new EventEmitter();
+  private carouselLoad = new Subscription();
 
   // tslint:disable-next-line:no-output-on-prefix
   @Output('onMove')
   private onMove = new EventEmitter<NguCarousel<T>>();
   // isFirstss = 0;
   arrayChanges: IterableChanges<{}>;
-  carouselInt: Subscription;
+  carouselInt: Subscription = new Subscription();
 
   listener1: () => void;
   listener2: () => void;
@@ -149,6 +149,7 @@ export class NguCarousel<T> extends NguCarouselStore
 
   private onResize: any;
   private onScrolling: any;
+  private onInitialDelay: any;
 
   pointNumbers: Array<any> = [];
 
@@ -357,7 +358,9 @@ export class NguCarousel<T> extends NguCarouselStore
 
   ngOnDestroy() {
     // clearInterval(this.carouselInt);
-    this.carouselInt && this.carouselInt.unsubscribe();
+    clearTimeout(this.onInitialDelay);
+    this.carouselInt.unsubscribe();
+    this._dataSubscription.unsubscribe();
     this._intervalController$.unsubscribe();
     this.carouselLoad.complete();
     this.onMove.complete();
@@ -866,7 +869,7 @@ export class NguCarousel<T> extends NguCarouselStore
 
       const interval$ = interval(this.inputs.interval.timing).pipe(mapTo(1));
 
-      setTimeout(() => {
+      this.onInitialDelay = setTimeout(() => {
         this.carouselInt = merge(
           play$,
           touchPlay$,
