@@ -74,7 +74,7 @@ export class NguCarousel<T> extends NguCarouselStore
   @Input('inputs')
   private inputs: NguCarouselConfig;
   @Output('carouselLoad')
-  private carouselLoad = new Subscription();
+  private carouselLoad: any;
 
   // tslint:disable-next-line:no-output-on-prefix
   @Output('onMove')
